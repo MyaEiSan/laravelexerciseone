@@ -16,7 +16,7 @@ class employeesController extends Controller
 
         // dd($data);
 
-        return view('layouts.index',$data);
+        return view('employees.index',$data);
     }
 
     public function passingdataone(){

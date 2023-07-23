@@ -8,14 +8,7 @@ class dashboardsController extends Controller
 {
     public function index(){
 
-        $data['employeedata'] = [
-            'name'=>'Aung Ko Ko',
-            'email'=>'aungkoko@gmail.com',
-            'phone'=>'09123456'
-        ];
-
-        // dd($data);
-
-        return view('layouts/index',$data);
+        $hay = "Hay Hay";
+        return view('layouts/index',compact('hay'));
     }
 }

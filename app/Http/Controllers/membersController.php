@@ -16,7 +16,9 @@ class membersController extends Controller
             "0933333"
         ];
 
+        $hay = "Hay Hay";
+
         // return view('members/index');
-        return view('members/index',compact('header','students'));
+        return view('members/index',compact('header','students','hay'));
     }
 }

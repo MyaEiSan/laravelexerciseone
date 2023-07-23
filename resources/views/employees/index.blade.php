@@ -43,6 +43,10 @@
         @else 
          <h3>You were wrong</h3>
         @endif 
+
+
+        {{$thanks}}
+        
     </body>
 </html>
 
