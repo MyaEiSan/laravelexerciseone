@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class ProductsController extends Controller
 {
@@ -32,6 +33,17 @@ class ProductsController extends Controller
      */
     public function store(Request $request)
     {
+
+        $this->validate($request,[
+            'name' => 'required|unique:products,name',
+            'price' => 'required|numeric',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,ico|max:3072', // mime stands for Multi Purpose Internet Mail Extensions 
+
+            'title' => 'required|unique:articles,title|max:100',
+            // 'status' => 'required|in:active,inactive',
+            // 'public_at' => 'nullable|date'
+        ]);
+
         // => 1. Public Folder (public/customfolder/)
 
         // $request->image->move('customfolder',$imagename);
@@ -131,7 +143,7 @@ class ProductsController extends Controller
         //     // dd($file->get());
         //     // dd(file_get_contents($file));
 
-        //     Storage::disk('local')->put('images/',$imagenewname,$file->get());
+        //     Storage::disk('local')->put('images/'.$imagenewname,$file->get());
 
         //     $product->image = $imagenewname;
         // }
@@ -143,7 +155,7 @@ class ProductsController extends Controller
             // dd($file->get());
             // dd(file_get_contents($file));
 
-            Storage::disk('local')->put('images/',$imagenewname,file_get_contents($file),'public');
+            Storage::disk('local')->put('images/'.$imagenewname,file_get_contents($file),'public');
 
             $fileurl = "public/app/images/".$imagenewname;
 
@@ -181,11 +193,97 @@ class ProductsController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        Product::findOrFail($id)->update([
-            'name'=>$request['name'],
-            'price'=>$request['price']
-        ]);
+        $product = Product::findOrFail($id);
+        $product->name = $request['name'];
+        $product->price = $request['price'];
+        
+        // delete old file and updated new file (For Public)
+        // if($request->hasFile('image')){
+        //     $path = public_path('images/').$product->image;
 
+        //     if(File::exists($path)){
+        //         File::delete($path);
+        //     }
+        // }
+
+
+        // delete old file and updated new file (For Storage)
+        if($request->hasFile('image')){
+            $path = storage_path('app/public/images/').$product->image;
+
+            if(File::exists($path)){
+                File::delete($path);
+            }
+        }
+
+
+
+        // update single file 
+
+        // if($request->hasFile('image')){
+        //     $file = $request->file('image');
+
+        //     $fname = $file->getClientOriginalName();
+
+        //     $imagenewname = uniqid().$fname; 
+
+        //     $file->move(public_path('images'),$imagenewname);
+
+        //     $product->image = $imagenewname; 
+
+        // }
+
+    
+
+        // if($request->hasfile('image')){
+        //     $file = $request->file('image');
+        //     $fnameext = $file->getClientOriginalExtension();
+
+        //     $imagenewname = uniqid().'.'.$fnameext;
+
+        //     $file->storeAs('public/images',$imagenewname);
+
+        //     $product->image = $imagenewname;
+        // }
+
+
+    
+        // if($request->hasfile('image')){
+        //     $file = $request->file('image');
+        //     $fileurl = $file->store('public/images');
+        //     $product->image = trim($fileurl,"public");
+        // }
+
+        if($request->hasfile('image')){
+            $file = $request->file('image');
+            $fnameext = $file->extension(); 
+            $imagenewname = uniqid().'.'.$fnameext; 
+
+
+            // Storage::disk('local')->put('public/images/'.$imagenewname,$file->get(),'public');
+            // Storage::disk('local')->put('public/images/'.$imagenewname,file_get_contents($file),'public');
+            Storage::disk('local')->put('public/images/'.$imagenewname,File::get($file),'public');
+
+            $product->image = $imagenewname;
+        }
+
+
+        // if($request->hasfile('image')){
+        //     $fnameext = $file->extension(); 
+        //     $imagenewname = uniqid().'.'.$fnameext; 
+
+        //     // dd($file->get());
+        //     // dd(file_get_contents($file));
+
+        //     Storage::disk('local')->put('images/',$imagenewname,file_get_contents($file),'public');
+
+        //     $fileurl = "public/app/images/".$imagenewname;
+
+        //     $product->image = $fileurl;
+        // }
+
+
+        $product->save();
         return redirect(route('products.index'));
     }
 
